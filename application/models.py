@@ -1,6 +1,5 @@
 from .database import db
 
-
 class User(db.Model):
     __tablename__ = "user"
     user_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
@@ -16,6 +15,7 @@ class Tracker(db.Model):
     type = db.Column(db.Integer, nullable=False)
     settings = db.Column(db.String)
     user_id = db.Column(db.Integer, nullable=False)
+    activity = db.relationship("Activity", backref="activity")
 
 class Activity(db.Model):
     __tablename__ = "activity"
