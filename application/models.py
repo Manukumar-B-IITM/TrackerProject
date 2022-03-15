@@ -23,4 +23,4 @@ class Activity(db.Model):
     timestamp = db.Column(db.DateTime, nullable=False)
     value = db.Column(db.String, nullable=False)
     note = db.Column(db.String, nullable=False)
-    tracker_id = db.Column(db.Integer, nullable=False)
+    tracker_id = db.Column(db.Integer, db.ForeignKey("tracker.id"), nullable=False)

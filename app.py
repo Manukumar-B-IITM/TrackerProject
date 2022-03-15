@@ -1,9 +1,10 @@
 import enum
 import io
 import base64
-from datetime import datetime
+from datetime import datetime, timedelta
+from math import remainder
+# import humanize
 import os
-from unicodedata import name
 from flask import Flask
 from sqlalchemy import Numeric, true
 from application import config
@@ -62,7 +63,13 @@ def after_request(response):
 @app.route("/", methods=["GET"])
 def home():
     if request.method == "GET":
-        return render_template("home.html", trackers=getTrackers()), 200
+        trackers, lastTimestamps = getTrackers()
+        return (
+            render_template(
+                "home.html", trackers=trackers, lastTimestamps=lastTimestamps
+            ),
+            200,
+        )
 
 
 # Tracker endpoints
@@ -161,7 +168,20 @@ def delete_activity(aid):
 
 def getTrackers():
     trackers = db.session.query(Tracker).all()
-    return trackers
+    lastTimeStamps = {}
+    for t in trackers:
+        activity = (
+        db.session.query(Activity)
+        .filter(Activity.tracker_id == t.id)
+        .order_by(Activity.timestamp.desc())
+        .first()
+    )
+        if activity is None:
+            lastTimeStamps[t.id] = "No Logs yet"
+        else:
+            lastTimeStamps[t.id] = convertToNaturalday(activity.timestamp)
+
+    return trackers, lastTimeStamps
 
 
 def createTracker(data):
@@ -428,7 +448,7 @@ class TRACKERTYPE(enum.Enum):
 
 @app.errorhandler(400)
 def bad_request(e):
-    return render_template("400.html", msg = e.description), 400
+    return render_template("400.html", msg=e.description), 400
 
 
 @app.errorhandler(500)
@@ -443,7 +463,7 @@ def validateTrackerData(tdata):
 
     if tdata["t_type"] is None or tdata["name"] == "":
         abort(400, "Tracker Type is mandatory")
-    
+
     return True
 
 
@@ -451,6 +471,22 @@ def validateTrackerLogData(tdata):
     # Validate Tracker data
     return True
 
+def convertToNaturalday(dt):
+    count = (datetime.now() - dt).days
+    if count == 0:
+        return "Today"
+    elif count == 1:
+        return "Yesterday"
+    elif count > 1 and count < 31:
+        return count + " day(s) ago"
+    elif count > 30 and count < 366:
+        return "" + str(int(count / 30)) + " Month(s) " + str(count % 30) + " Day(s) ago"
+    elif count > 365:
+        noOfYears = str(int(count/365))
+        remaining  = str(count % 365)
+        return "" + noOfYears + " Year(s) " + remaining + " Day(s) ago"
+
+    return (datetime.now() - dt).days
 
 if __name__ == "__main__":
     # Run the Flask app
