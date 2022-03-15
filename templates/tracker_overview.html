@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+{% include './head_content.html' %}
+
+<body>
+    {% include './navbar.html' %}
+    <div class="container">
+        <h1>{{ tracker.name }} Tracker</h1>
+        {% if base64Img %}
+        <div id="chart">
+            <img src="data:image/png;base64, {{base64Img}}" />
+        </div>
+
+        <h1>Logs</h1>
+        <table class="table table-striped table-hover caption-top">
+            <caption>List of Activities</caption>
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">Sl.no</th>
+                    <th scope="col">On</th>
+                    <th scope="col">Value</th>
+                    <th scope="col">Note</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in activities %}
+                <tr>
+                    <th scope="row"> {{ loop.index }}</th>
+                    <td>{{ a.timestamp }}</td>
+                    <td>
+                        {%if tracker.type == 3%}
+                        {% set timevalues = a.value.split(',') %}
+                        {{timevalues[0]}} Hrs {{timevalues[1]}} Min {{timevalues[2]}} Sec
+                        
+                        {%elif tracker.type == 4%}
+                        
+                            {% if a.value == '1' %}
+                                Yes
+                            {% else %}
+                                No
+                            {% endif %}
+                        
+                        {% else %}
+                        {{ a.value }}
+                        {% endif %}
+                    </td>
+                    <td>{{ a.note }}</td>
+                    <td>
+                        <div class="dropdown">
+                            <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                Actions
+                            </a>
+
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                <li><a class="dropdown-item" href="/activity/{{ a.id }}/update">Edit</a></li>
+                                <li><a class="dropdown-item" href="/activity/{{ a.id }}/delete">Delete</a></li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <h5>There are no logs for this tracker yet</h5>
+        {% endif %}
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,27 @@
+<!-- <nav class="navbar navbar-light bg-light">
+    <a class="navbar-brand mb-0 h1 btn btn-primary" href="/" role="button">Home</a>
+    <span class="navbar-brand mb-0 h1">Hello USER</span>
+    <span>Logout</span>
+</nav> -->
+
+<nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/">Hello, USER</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarText">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link" aria-current="page" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/tracker/create">Add Tracker</a>
+          </li>
+        </ul>
+        <form action="/logout" method="GET">
+            <button class="btn btn-outline-primary" type="submit">Logout</button>
+        </form>
+      </div>
+    </div>
+  </nav>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+{% include './head_content.html' %}
+
+<body>
+    {% include './navbar.html' %}
+
+    <h1>Update Log {{ tracker.name }}</h1>
+    <form action="/activity/{{ activity.id }}/update" method="POST" id="update-tracker-log">
+        <div>
+            <label>When: </label>
+            <input type="datetime-local" name="timestamp" id="whenDateTime" required />
+        </div>
+
+        {% if tracker.type == 1 %}
+        <div>
+            <label>value:</label>
+            <input type="text" name="tvalue"  value="{{ activity.value }}" required />
+        </div>
+
+        {% elif tracker.type == 2 %}
+        <div>
+            {% set options = tracker.settings.split(',') %}
+            {% set currOptions = activity.value.split(',') %}
+            <label>Select:</label>
+            {% for p in options %}
+            <input type="checkbox" name="tvalue" value="{{p}}"  {{ "checked" if p in currOptions }} />
+            <label>{{p}}</label>
+            {% endfor %}
+        </div>
+
+        {% elif tracker.type == 3 %}
+        <div>
+            {% set timeValues = activity.value.split(',') %}
+            <label>Hours:</label>
+            <input type="text" name="tvalue" required value="{{ timeValues[0] }}"/>
+        </div>
+        <div>
+            <label>Minutes:</label>
+            <input type="text" name="tvalue" required value="{{ timeValues[1] }}"/>
+        </div>
+        <div>
+            <label>Seconds:</label>
+            <input type="text" name="tvalue" required value="{{ timeValues[2] }}"/>
+        </div>
+
+        {% elif tracker.type == 4 %}
+        <div>
+            <label>value:</label>
+            <input type="radio" id="yes" name="tvalue" value="1" {{ "checked" if activity.value == "1" }}>
+            <label>Yes</label>
+            <input type="radio" id="no" name="tvalue" value="0" {{ "checked" if activity.value == "0" }}>
+            <label>No</label>
+        </div>
+
+        {% endif %}
+        <div>
+            <label>Note</label>
+            <textarea type="text" rows="4" name="note" >{{ activity.note }}</textarea>
+        </div>
+
+        <div>
+            <input class="btn btn-primary" type="submit" value="Log it">
+        </div>
+    </form>
+
+</body>
+
+</html>

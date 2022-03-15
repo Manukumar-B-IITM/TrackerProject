@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+    <!-- <head>
+        <meta charset="utf-8">
+        <title>Tracker Overview</title>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}"/>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}"/>
+        <script type="text/javascript" src="{{ url_for('static', filename='js/custom_validations.js') }}"></script>
+    </head> -->
+    {% include './head_content.html' %}
+    <body>
+        {% include './navbar.html' %}
+
+        <h1>Update a Tracker</h1>
+    <form action="/tracker/{{ tracker.id }}/update" method="POST" id="update-tracker-form">
+        <div>
+            <label>Tracker Name: </label>
+            <input type="text" name="name" value="{{ tracker.name }}" required />
+        </div>
+
+        <div>
+            <label>Description:</label>
+            <textarea  type="text" rows="4" name="desc" value="{{ tracker.description }}">{{ tracker.description }}</textarea>
+        </div>
+
+        <div>
+            <label>Type</label>
+            <select name="t_type" value="{{ tracker.type }}" disabled>
+                <option value="1" {{ "selected" if tracker.type == 1 }}>Numerical</option>
+                <option value="2" {{ "selected" if tracker.type == 2 }}>Multiple Choice</option>
+                <option value="3" {{ "selected" if tracker.type == 3 }}>Time Duration</option>
+                <option value="4" {{ "selected" if tracker.type == 4 }}>Boolean</option>
+              </select>
+        </div>
+
+        <div>
+            <label>Settings:</label>
+            <input type="text" name="settings" disabled/>
+        </div>
+
+        <div>
+            <input class="btn btn-primary" type="submit" value="Submit">
+        </div>
+    </form>
+        
+    </body>
+</html>

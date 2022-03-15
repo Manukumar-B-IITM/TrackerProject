@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+{% include './head_content.html' %}
+
+<body>
+    {% include './navbar.html' %}
+    <div class="container">
+        {% if trackers|length > 0 %}
+
+        <table class="table table-striped table-hover caption-top">
+            <caption>List of Trackers</caption>
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">Sl.no</th>
+                    <th scope="col">Tracker</th>
+                    <th scope="col">Last Tracked</th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in trackers %}
+                <tr>
+                    <th scope="row"> {{ loop.index }}</th>
+                    <td><a href="/tracker/{{ t.id }}/overview" class="link-info">{{ t.name }}</a></td>
+                    <td>{{ t.last_tracked }}</td>
+                    <td><a class="btn btn-primary" href="/tracker/{{ t.id }}/log" role="button">+</a></td>
+                    <td>
+                        <div class="dropdown">
+                            <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                Actions
+                            </a>
+
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                <li><a class="dropdown-item" href="/tracker/{{ t.id }}/update">Edit</a></li>
+                                <li><a class="dropdown-item" href="/tracker/{{ t.id }}/delete">Delete</a></li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% else %}
+        <h5>There are no trackers present. Go ahead create one by cliking Add Tracker</h5>
+        {% endif %}
+        
+        <div class="vstack gap-2 col-md-5 mx-auto">
+            <a class="btn btn-primary btn-lg" href="/tracker/create" role="button">+ Add Tracker</a>
+        </div>
+    </div>
+</body>
+
+</html>
