@@ -1,18 +1,12 @@
 <!DOCTYPE html>
 <html>
-<!-- <head>
-        <meta charset="utf-8">
-        <title>Tracker Overview</title>
-        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}"/>
-        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}"/>
-        <script type="text/javascript" src="{{ url_for('static', filename='js/custom_validation.js') }}"></script>
-    </head> -->
+
 {% include './head_content.html' %}
 
 <body>
     {% include './navbar.html' %}
 
-    <h1>Create a Tracker</h1>
+    <h1 class="text-center">Create a Tracker</h1>
     <div>
         <form action="/tracker/create" class="container" method="POST" id="create-tracker-form">
             <div class="mb-3">
