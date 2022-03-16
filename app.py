@@ -209,19 +209,21 @@ def createTracker(data):
 
 
 def updateTracker(data, tid):
-    try:
-        if validation.validateTrackerData(data):
-            tracker = db.session.query(Tracker).filter(Tracker.id == tid).first()
-            if tracker != None:
-                tracker.name = data["name"]
-                tracker.description = data["desc"]
-                db.session.flush()
-                db.session.commit()
-            return True
-        return False
-    except:
-        db.session.rollback()
-        return False
+    # try:
+    if validateTrackerData(data):
+        tracker = db.session.query(Tracker).filter(Tracker.id == tid).first()
+        if tracker != None:
+            tracker.name = data["name"]
+            tracker.description = data["desc"]
+            db.session.flush()
+            db.session.commit()
+        return True
+    return False
+
+
+# except:
+#     db.session.rollback()
+#     return False
 
 
 def deleteTracker(tid):
