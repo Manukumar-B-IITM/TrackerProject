@@ -1,9 +1,11 @@
 import enum
 import io
+
 # import re
 import base64
 from datetime import datetime, timedelta
 from math import remainder
+
 # import humanize
 import os
 from flask import Flask
@@ -172,11 +174,11 @@ def getTrackers():
     lastTimeStamps = {}
     for t in trackers:
         activity = (
-        db.session.query(Activity)
-        .filter(Activity.tracker_id == t.id)
-        .order_by(Activity.timestamp.desc())
-        .first()
-    )
+            db.session.query(Activity)
+            .filter(Activity.tracker_id == t.id)
+            .order_by(Activity.timestamp.desc())
+            .first()
+        )
         if activity is None:
             lastTimeStamps[t.id] = "No Logs yet"
         else:
@@ -251,47 +253,51 @@ def getTrackerData(tid):
     return tracker, activities
 
 
-###################################################################
-# Activity Controller
-###################################################################
+#####################################################################
+# Activity Controller                                               #
+#####################################################################
 
 
 def create_log(data, tid):
-    try:
-        if validation.validateTrackerLogData(data):
-            # TODO handle the timestamp better with UTC timestamps
-            activity = Activity(
-                timestamp=getPythonTime(data["timestamp"]),
-                value=",".join(request.form.getlist("tvalue")),  # joining by ','
-                note=data["note"],
-                tracker_id=tid,
-            )
-            db.session.add(activity)
-            db.session.commit()
-            return True
-        return False
-    except:
-        db.session.rollback()
-        return False
+    # try:
+    if validateTrackerLogData(data, tid):
+        # TODO handle the timestamp better with UTC timestamps
+        activity = Activity(
+            timestamp=getPythonTime(data["timestamp"]),
+            value=",".join(request.form.getlist("tvalue")),  # joining by ','
+            note=data["note"],
+            tracker_id=tid,
+        )
+        db.session.add(activity)
+        db.session.commit()
+        return True
+    return False
+
+
+# except:
+#     db.session.rollback()
+#     return False
 
 
 def updateActivity(data, aid):
-    try:
-        if validation.validateTrackerLogData(data):
-            activity = db.session.query(Activity).filter(Activity.id == aid).first()
-            if activity != None:
+    # try:
+    if validation.validateTrackerLogData(data):
+        activity = db.session.query(Activity).filter(Activity.id == aid).first()
+        if activity != None:
 
-                activity.timestamp = getPythonTime(data["timestamp"])
-                activity.value = ",".join(request.form.getlist("tvalue"))
-                activity.note = data["note"]
+            activity.timestamp = getPythonTime(data["timestamp"])
+            activity.value = ",".join(request.form.getlist("tvalue"))
+            activity.note = data["note"]
 
-                db.session.flush()
-                db.session.commit()
-            return True
-        return False
-    except:
-        db.session.rollback()
-        return False
+            db.session.flush()
+            db.session.commit()
+        return True
+    return False
+
+
+# except:
+#     db.session.rollback()
+#     return False
 
 
 def deleteActivity(aid):
@@ -461,25 +467,68 @@ def validateTrackerData(tdata):
     # Validate Tracker data
     if tdata["name"] is None or tdata["name"] == "":
         abort(400, "Tracker Name is mandatory")
-    
+
     if not tdata["name"].isalpha():
         abort(400, "Only alphabets are allowed for Tracker Name")
 
     if tdata["t_type"] is None or tdata["t_type"] == "":
         abort(400, "Tracker Type is mandatory")
-    
+
     if tdata["t_type"] not in ["1", "2", "3", "4"]:
         abort(400, "Invalid tracker type")
-    
-    if tdata["t_type"] == "2" and (tdata["settings"] is None or tdata["settings"] == ""):
-        abort(400, "For multichoice tracker, setting field is mandatory. Choices should be entered as comma separated values.")
+
+    if tdata["t_type"] == "2" and (
+        tdata["settings"] is None or tdata["settings"] == ""
+    ):
+        abort(
+            400,
+            "For multichoice tracker, setting field is mandatory. Choices should be entered as comma separated values.",
+        )
 
     return True
 
 
-def validateTrackerLogData(tdata):
+def validateTrackerLogData(tdata, tid):
     # Validate Tracker data
+    if tdata["timestamp"] is None or tdata["timestamp"] == "":
+        abort(400, "Tracker log timestamp is mandatory.")
+    try:
+        getPythonTime(tdata["timestamp"])
+    except:
+        abort(400, "Tracker log timestamp is invalid/malformed.")
+
+    tracker = db.session.query(Tracker).filter(Tracker.id == tid).first()
+
+    if tracker is None:
+        abort(400, "Tracker id is not valid.")
+
+    if tracker.type == 1:
+        try:
+            float(tdata["value"])
+        except:
+            abort(400, "Log value should be Numeric. ex: 10, 2.5 ...")
+
+    if tracker.type == 2:
+        possibleValues = tracker.settings.split(",")
+        for op in request.form.getlist("tvalue"):
+            if op not in possibleValues:
+                abort(
+                    400,
+                    "Invalid option for the Multi tracker. Allowed values are "
+                    + possibleValues,
+                )
+
+    if tracker.type == 3:
+        timeValues = request.form.getlist("tvalue")
+        for t in timeValues:
+            if not t.isdigit():
+                abort(400, "Time duration values are not correct")
+
+    if tracker.type == 4 and tdata["tvalue"] not in ["1", "0"]:
+        abort(400, "Only yes/no allowed")
+
     return True
+
 
 def convertToNaturalday(dt):
     count = (datetime.now() - dt).days
@@ -490,13 +539,16 @@ def convertToNaturalday(dt):
     elif count > 1 and count < 31:
         return count + " day(s) ago"
     elif count > 30 and count < 366:
-        return "" + str(int(count / 30)) + " Month(s) " + str(count % 30) + " Day(s) ago"
+        return (
+            "" + str(int(count / 30)) + " Month(s) " + str(count % 30) + " Day(s) ago"
+        )
     elif count > 365:
-        noOfYears = str(int(count/365))
-        remaining  = str(count % 365)
+        noOfYears = str(int(count / 365))
+        remaining = str(count % 365)
         return "" + noOfYears + " Year(s) " + remaining + " Day(s) ago"
 
     return (datetime.now() - dt).days
+
 
 if __name__ == "__main__":
     # Run the Flask app
