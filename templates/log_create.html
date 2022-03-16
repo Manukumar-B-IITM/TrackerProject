@@ -7,62 +7,96 @@
     {% include './navbar.html' %}
 
     <h1>Log {{ tracker.name }}</h1>
-    <form action="/tracker/{{ tracker.id }}/log" method="POST" id="create-tracker-log">
-        <div>
-            <label>When: </label>
-            <input type="datetime-local" name="timestamp" id="whenDateTime" required />
-        </div>
+    <div>
+        <form action="/tracker/{{ tracker.id }}/log" class="container" method="POST" id="create-tracker-log">
+            <div class="mb-3">
+                <label class="form-label">When: </label>
+                <input type="datetime-local" class="form-control" name="timestamp" id="whenDateTime" required />
+            </div>
 
-        {% if tracker.type == 1 %}
-        <div>
-            <label>value:</label>
-            <input type="text" name="tvalue" required />
-        </div>
+            {% if tracker.type == 1 %}
+            <div class="mb-3">
+                <label class="form-label">Value:</label>
+                <input type="text" class="form-control" name="tvalue" required />
+            </div>
 
-        {% elif tracker.type == 2 %}
-        <div>
-            {% set options = tracker.settings.split(',') %}
-            <label>Select:</label>
-            {% for p in options %}
-            <input type="checkbox" name="tvalue" value="{{p}}" />
-            <label>{{p}}</label>
-            {% endfor %}
-        </div>
+            {% elif tracker.type == 2 %}
+            <div class="mb-3">
+                {% set options = tracker.settings.split(',') %}
+                <label class="form-label">Select:</label>
+                {% for p in options %}
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="tvalue" value="{{p}}" />
+                    <label class="form-check-label">{{p}}</label>
+                </div>
+                {% endfor %}
 
-        {% elif tracker.type == 3 %}
-        <div>
-            <label>Hours:</label>
-            <input type="text" name="tvalue" required />
-        </div>
-        <div>
-            <label>Minutes:</label>
-            <input type="text" name="tvalue" required />
-        </div>
-        <div>
-            <label>Seconds:</label>
-            <input type="text" name="tvalue" required />
-        </div>
+            </div>
 
-        {% elif tracker.type == 4 %}
-        <div>
-            <label>value:</label>
-            <input type="radio" id="yes" name="tvalue" value="1">
-            <label>Yes</label>
-            <input type="radio" id="no" name="tvalue" value="0">
-            <label>No</label>
-        </div>
+            {% elif tracker.type == 3 %}
+            <div class="mb-3">
+                <label class="form-label">Hours:</label>
+                <input type="text" class="form-control" name="tvalue" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Minutes:</label>
+                <!-- <input type="text" class="form-control" name="tvalue" required /> -->
+                <!-- <input type="range" class="form-range" min="0" max="59"  step="1" id="customRange2" name="tvalue" required> -->
+                <select class="form-select" name="tvalue" aria-label="Default select example">
+                    <!-- <option selected>Open this select menu</option> -->
+                    {% for min in range(0,60) %}
+                    <option value="{{min}}">{{min}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Seconds:</label>
+                <!-- <input type="text" class="form-control" name="tvalue" required /> -->
+                <!-- <input type="range" class="form-range" min="0" max="59" step="1" id="customRange2" name="tvalue"
+                    required> -->
+                <select class="form-select" name="tvalue" aria-label="Default select example">
+                    <!-- <option selected>Open this select menu</option> -->
+                    {% for sec in range(0,60) %}
+                    <option value="{{sec}}">{{sec}}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
-        {% endif %}
-        <div>
-            <label>Note</label>
-            <textarea type="text" rows="4" name="note"></textarea>
-        </div>
+            {% elif tracker.type == 4 %}
+            <div class="mb-3">
+                <label class="form-label">Value:</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1"
+                        value="1">
+                    <label class="form-check-label" for="flexRadioDefault1">
+                        Yes
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1"
+                        value="0">
+                    <label class="form-check-label" for="flexRadioDefault1">
+                        No
+                    </label>
+                </div>
+                <!-- <input type="radio" id="yes" name="tvalue" value="1"> -->
+                <!-- <label>Yes</label> -->
+                <!-- <input type="radio" id="no" name="tvalue" value="0">
+                 -->
+                <!-- <label>No</label> -->
+            </div>
 
-        <div>
-            <input class="btn btn-primary" type="submit" value="Log it">
-        </div>
-    </form>
+            {% endif %}
+            <div class="mb-3">
+                <label class="form-label">Note</label>
+                <textarea type="text" class="form-control" rows="4" name="note"></textarea>
+            </div>
 
+            <div class="mb-3">
+                <input class="btn btn-primary" class="form-control" type="submit" value="Log it">
+            </div>
+        </form>
+    </div>
 </body>
 
 </html>
