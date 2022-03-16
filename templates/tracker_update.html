@@ -10,20 +10,20 @@
         <form action="/tracker/{{ tracker.id }}/update" class="container" method="POST" id="update-tracker-form">
             <div class="mb-3">
                 <label for="tname" class="form-label">Tracker Name: </label>
-                <input type="text"  class="form-control" id="tname" name="name" value="{{ tracker.name }}" required />
+                <input type="text" class="form-control" id="tname" name="name" value="{{ tracker.name }}" required />
                 <div id="namehelp" class="form-text">Give an appropriate name for the tracker</div>
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Description:</label>
-                <textarea type="text"  class="form-control" rows="4" name="desc"
+                <textarea type="text" class="form-control" rows="4" name="desc"
                     value="{{ tracker.description }}">{{ tracker.description }}</textarea>
-                    <div id="deschelp" class="form-text">Describe the tracker</div>
+                <div id="deschelp" class="form-text">Describe the tracker</div>
             </div class="mb-3">
 
             <div class="mb-3">
                 <label class="form-label">Type</label>
-                <select name="t_type"  class="form-control" value="{{ tracker.type }}" disabled>
+                <select name="t_type" class="form-control" value="{{ tracker.type }}" disabled>
                     <option value="1" {{ "selected" if tracker.type == 1 }}>Numerical</option>
                     <option value="2" {{ "selected" if tracker.type == 2 }}>Multiple Choice</option>
                     <option value="3" {{ "selected" if tracker.type == 3 }}>Time Duration</option>
@@ -32,9 +32,9 @@
                 <div id="ttypehelp" class="form-text">Select the tracker type among the given option</div>
             </div>
 
-            <div class="mb-3">
+            <div class="mb-3 hideTrackerSettings">
                 <label class="form-label">Settings:</label>
-                <input type="text"  class="form-control" name="settings" disabled />
+                <input type="text" class="form-control" name="settings" disabled />
                 <div id="deschelp" class="form-text">Provide multiple options (values) separeted by <mark>,</mark></div>
             </div>
 

@@ -1,5 +1,6 @@
 import enum
 import io
+# import re
 import base64
 from datetime import datetime, timedelta
 from math import remainder
@@ -460,9 +461,18 @@ def validateTrackerData(tdata):
     # Validate Tracker data
     if tdata["name"] is None or tdata["name"] == "":
         abort(400, "Tracker Name is mandatory")
+    
+    if not tdata["name"].isalpha():
+        abort(400, "Only alphabets are allowed for Tracker Name")
 
-    if tdata["t_type"] is None or tdata["name"] == "":
+    if tdata["t_type"] is None or tdata["t_type"] == "":
         abort(400, "Tracker Type is mandatory")
+    
+    if tdata["t_type"] not in ["1", "2", "3", "4"]:
+        abort(400, "Invalid tracker type")
+    
+    if tdata["t_type"] == "2" and (tdata["settings"] is None or tdata["settings"] == ""):
+        abort(400, "For multichoice tracker, setting field is mandatory. Choices should be entered as comma separated values.")
 
     return True
 
