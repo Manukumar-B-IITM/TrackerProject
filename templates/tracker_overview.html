@@ -4,8 +4,8 @@
 
 <body>
     {% include './navbar.html' %}
+    <h1 class="text-center">{{ tracker.name }} Tracker</h1>
     <div class="container">
-        <h1>{{ tracker.name }} Tracker</h1>
         {% if base64Img %}
         <div id="chart">
             <img src="data:image/png;base64, {{base64Img}}" />

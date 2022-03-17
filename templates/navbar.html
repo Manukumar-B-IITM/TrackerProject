@@ -18,6 +18,10 @@
       <form action="/logout" method="GET">
         <button class="btn btn-outline-primary" type="submit">Logout</button>
       </form>
+      {% elif isLogin == True %}
+      <form action="/register" method="GET">
+        <button class="btn btn-outline-primary" type="submit">Register</button>
+      </form>
       {% else %}
       <form action="/login" method="GET">
         <button class="btn btn-outline-primary" type="submit">Login</button>

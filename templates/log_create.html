@@ -6,7 +6,7 @@
 <body>
     {% include './navbar.html' %}
 
-    <h1>Log {{ tracker.name }}</h1>
+    <h1 class="text-center">Log {{ tracker.name }}</h1>
     <div>
         <form action="/tracker/{{ tracker.id }}/log" class="container" method="POST" id="create-tracker-log">
             <div class="mb-3">

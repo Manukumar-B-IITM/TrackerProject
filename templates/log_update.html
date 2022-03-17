@@ -6,7 +6,7 @@
 <body>
     {% include './navbar.html' %}
 
-    <h1>Update Log {{ tracker.name }}</h1>
+    <h1 class="text-center">Update Log {{ tracker.name }}</h1>
     <form action="/activity/{{ activity.id }}/update" class="container" method="POST" id="update-tracker-log">
         <div class="mb-3">
             <label class="form-label">When: </label>
