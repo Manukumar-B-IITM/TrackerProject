@@ -1,14 +1,13 @@
 import enum
 import io
 
-# import re
 import base64
 from datetime import datetime, timedelta
 from math import remainder
 
-# import humanize
 import os
 from flask import Flask
+from flask_login import login_required
 from sqlalchemy import Numeric, true
 from application import config
 from application.config import LocalDevelopmentConfig
@@ -17,11 +16,12 @@ import logging
 import matplotlib.pyplot as plt
 import numpy as np
 
-# from flask import current_app as app
 from flask import request, url_for
 from flask import render_template, redirect, abort
-from application.models import Tracker, Activity
+from application.models import Tracker, Activity, User, Role
 import application.validation as validation
+
+from flask_security import Security, SQLAlchemyUserDatastore, SQLAlchemySessionUserDatastore
 
 
 logging.basicConfig(
@@ -32,7 +32,6 @@ logging.basicConfig(
 
 
 app = None
-
 
 def create_app():
     app = Flask(__name__, template_folder="templates")
@@ -45,6 +44,8 @@ def create_app():
         app.config.from_object(LocalDevelopmentConfig)
     db.init_app(app)
     app.app_context().push()
+    user_datastore = SQLAlchemySessionUserDatastore(db.session, User, Role)
+    security = Security(app, user_datastore)
     app.logger.info("App setup complete")
     print("App setup complete")
     return app
@@ -64,6 +65,7 @@ def after_request(response):
 
 
 @app.route("/", methods=["GET"])
+@login_required
 def home():
     if request.method == "GET":
         trackers, lastTimestamps = getTrackers()
@@ -74,15 +76,8 @@ def home():
             200,
         )
 
-
-# Tracker endpoints
-# @app.route("/tracker/<tid>", methods=["GET"])
-# def trackerInfo(tid):
-#     tracker = Tracker.query.filter(Tracker.id == tid).first()
-#     return render_template("tracker_overview.html", tracker = tracker)
-
-
 @app.route("/tracker/create", methods=["GET", "POST"])
+@login_required
 def create_tracker():
     if request.method == "GET":
         return render_template("tracker_create.html"), 200
@@ -93,6 +88,7 @@ def create_tracker():
 
 
 @app.route("/tracker/<int:tid>/update", methods=["GET", "POST"])
+@login_required
 def update_tracker(tid):
     if request.method == "GET":
         tracker = Tracker.query.filter(Tracker.id == tid).first()
@@ -104,20 +100,18 @@ def update_tracker(tid):
 
 
 @app.route("/tracker/<int:tid>/delete")
+@login_required
 def delete_tracker(tid):
     if request.method == "GET":
         if deleteTracker(tid):
             return redirect(url_for("home"))
 
 
-@app.after_request
-def after_request(response):
-    header = response.headers
-    header["Access-Control-Allow-Origin"] = "*"
-    return response
+
 
 
 @app.route("/tracker/<int:tid>/log", methods=["GET", "POST"])
+@login_required
 def activity_log(tid):
     if request.method == "GET":
         return render_template("log_create.html", tracker=getTracker(tid)), 200
@@ -128,21 +122,21 @@ def activity_log(tid):
 
 
 @app.route("/tracker/<int:tid>/overview", methods=["GET"])
+@login_required
 def tracker_overview(tid):
     if request.method == "GET":
         tracker, activities = getTrackerData(tid)
-        # prepareCharts(tracker, activities)
-        # getbase64LineChartsImg(activities)
+
         return render_template(
             "tracker_overview.html",
             tracker=tracker,
             activities=activities,
-            # imgURL=url_for("static", filename="trend.png"),
             base64Img=getBase64ImgStr(tracker, activities),
         )
 
 
 @app.route("/activity/<int:aid>/update", methods=["GET", "POST"])
+@login_required
 def update_activity(aid):
     if request.method == "GET":
         activity = getActivity(aid)
@@ -158,12 +152,17 @@ def update_activity(aid):
 
 
 @app.route("/activity/<int:aid>/delete")
+@login_required
 def delete_activity(aid):
     if request.method == "GET":
         if deleteActivity(aid):
             return redirect(url_for("home"))
 
-
+@app.after_request
+def after_request(response):
+    header = response.headers
+    header["Access-Control-Allow-Origin"] = "*"
+    return response
 ###################################################################
 # Tracker Controller
 ###################################################################
@@ -188,7 +187,6 @@ def getTrackers():
 
 
 def createTracker(data):
-    # try:
     if validateTrackerData(data):
         tracker = Tracker(
             name=data["name"],
@@ -203,13 +201,7 @@ def createTracker(data):
     return False
 
 
-# except:
-#     db.session.rollback()
-#     return False
-
-
 def updateTracker(data, tid):
-    # try:
     if validateTrackerData(data):
         tracker = db.session.query(Tracker).filter(Tracker.id == tid).first()
         if tracker != None:
@@ -219,11 +211,6 @@ def updateTracker(data, tid):
             db.session.commit()
         return True
     return False
-
-
-# except:
-#     db.session.rollback()
-#     return False
 
 
 def deleteTracker(tid):
@@ -261,7 +248,6 @@ def getTrackerData(tid):
 
 
 def create_log(data, tid):
-    # try:
     if validateTrackerLogData(data, tid):
         # TODO handle the timestamp better with UTC timestamps
         activity = Activity(
@@ -276,13 +262,7 @@ def create_log(data, tid):
     return False
 
 
-# except:
-#     db.session.rollback()
-#     return False
-
-
 def updateActivity(data, aid):
-    # try:
     if validation.validateTrackerLogData(data):
         activity = db.session.query(Activity).filter(Activity.id == aid).first()
         if activity != None:
@@ -295,11 +275,6 @@ def updateActivity(data, aid):
             db.session.commit()
         return True
     return False
-
-
-# except:
-#     db.session.rollback()
-#     return False
 
 
 def deleteActivity(aid):
@@ -439,15 +414,11 @@ def getBase64Img():
 
 
 # ENUMS
-# TRACKERTYPE = {"numeric": 1, "multi": 2, "time_duration": 3, "bool": 4}
 class TRACKERTYPE(enum.Enum):
     Numeric = 1
     Multi = 2
     Time_Duration = 3
     Bool = 4
-
-
-# TRACKERTYPE.NUMER
 
 
 #########################################################################
@@ -458,6 +429,10 @@ class TRACKERTYPE(enum.Enum):
 @app.errorhandler(400)
 def bad_request(e):
     return render_template("400.html", msg=e.description), 400
+
+@app.errorhandler(404)
+def bad_request(e):
+    return render_template("404.html", msg=e.description), 404
 
 
 @app.errorhandler(500)
