@@ -12,6 +12,7 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String, unique=True)
     password = db.Column(db.String(255))
     active = db.Column(db.Boolean())
+    trackers = db.relationship("Tracker", backref="tracker")
     roles = db.relationship('Role', secondary=roles_users, backref=db.backref('users', lazy='dynamic'))            
 
 class Role(db.Model, RoleMixin):
@@ -27,10 +28,8 @@ class Tracker(db.Model):
     description = db.Column(db.String)
     type = db.Column(db.Integer, nullable=False)
     settings = db.Column(db.String)
-    user_id = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.Integer,  db.ForeignKey("user.id"), nullable=False)
     activity = db.relationship("Activity", backref="activity")
-
-
 
 class Activity(db.Model):
     __tablename__ = "activity"

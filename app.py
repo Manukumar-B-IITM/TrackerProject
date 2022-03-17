@@ -2,14 +2,11 @@ import enum
 import io
 
 import base64
-from datetime import datetime, timedelta
-from math import remainder
+from datetime import datetime
 
 import os
 from flask import Flask
-from flask_login import login_required
-from sqlalchemy import Numeric, true
-from application import config
+from flask_login import current_user, login_required
 from application.config import LocalDevelopmentConfig
 from application.database import db
 import logging
@@ -21,7 +18,11 @@ from flask import render_template, redirect, abort
 from application.models import Tracker, Activity, User, Role
 import application.validation as validation
 
-from flask_security import Security, SQLAlchemyUserDatastore, SQLAlchemySessionUserDatastore
+from flask_security import (
+    Security,
+    SQLAlchemyUserDatastore,
+    SQLAlchemySessionUserDatastore,
+)
 
 
 logging.basicConfig(
@@ -32,6 +33,11 @@ logging.basicConfig(
 
 
 app = None
+
+from flask_security.forms import RegisterForm, StringField, Required
+
+class ExtendedRegisterForm(RegisterForm):
+    username = StringField("User Name", [Required()])
 
 def create_app():
     app = Flask(__name__, template_folder="templates")
@@ -45,7 +51,8 @@ def create_app():
     db.init_app(app)
     app.app_context().push()
     user_datastore = SQLAlchemySessionUserDatastore(db.session, User, Role)
-    security = Security(app, user_datastore)
+    security = Security(app, user_datastore, register_form=ExtendedRegisterForm)
+    # security = Security(app, user_datastore)
     app.logger.info("App setup complete")
     print("App setup complete")
     return app
@@ -76,6 +83,7 @@ def home():
             200,
         )
 
+
 @app.route("/tracker/create", methods=["GET", "POST"])
 @login_required
 def create_tracker():
@@ -105,9 +113,6 @@ def delete_tracker(tid):
     if request.method == "GET":
         if deleteTracker(tid):
             return redirect(url_for("home"))
-
-
-
 
 
 @app.route("/tracker/<int:tid>/log", methods=["GET", "POST"])
@@ -158,18 +163,21 @@ def delete_activity(aid):
         if deleteActivity(aid):
             return redirect(url_for("home"))
 
+
 @app.after_request
 def after_request(response):
     header = response.headers
     header["Access-Control-Allow-Origin"] = "*"
     return response
+
+
 ###################################################################
 # Tracker Controller
 ###################################################################
 
 
 def getTrackers():
-    trackers = db.session.query(Tracker).all()
+    trackers = db.session.query(Tracker).filter(Tracker.user_id == current_user.id).all()
     lastTimeStamps = {}
     for t in trackers:
         activity = (
@@ -193,7 +201,7 @@ def createTracker(data):
             description=data["desc"],
             type=data["t_type"],
             settings=data["settings"],
-            user_id=1,  # TODO Hardcoded to one user
+            user_id=current_user.id,  # TODO Hardcoded to one user
         )
         db.session.add(tracker)
         db.session.commit()
@@ -430,6 +438,7 @@ class TRACKERTYPE(enum.Enum):
 def bad_request(e):
     return render_template("400.html", msg=e.description), 400
 
+
 @app.errorhandler(404)
 def bad_request(e):
     return render_template("404.html", msg=e.description), 404
@@ -525,6 +534,13 @@ def convertToNaturalday(dt):
         return "" + noOfYears + " Year(s) " + remaining + " Day(s) ago"
 
     return (datetime.now() - dt).days
+
+
+#######################################################################################
+# Login
+#######################################################################################
+
+
 
 
 if __name__ == "__main__":

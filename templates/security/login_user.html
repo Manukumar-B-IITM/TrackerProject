@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+
+<html>
+{% include './head_content.html' %}
+
+<body>
+    {% include './navbar.html' %}
+    <div id="signup">
+        <h1 class="text-center">Login</h1>
+
+        <form id="logfrm" class="container" name='login_user_form' method="POST"
+            action="{{ url_for_security('login') }}">
+            
+            {{ login_user_form.hidden_tag() }}
+           
+            <div class="mb-3">
+                <label class="form-label">Email: </label>
+                {{ login_user_form.email(placeholder="Email", type="email",  class="form-control") }}
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Password: </label>
+                {{ login_user_form.password(placeholder="Password", type="password", class="form-control") }}
+            </div>
+
+            <div class="mb-3">
+                {{ login_user_form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+    </div>
+</body>
+
+</html>
