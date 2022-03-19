@@ -1,11 +1,12 @@
 import enum
 import io
-
+from io import StringIO
+import os
 import base64
 from datetime import datetime
 
-import os
-from flask import Flask
+import csv
+from flask import Flask, make_response
 from flask_login import current_user, login_required
 from application.config import LocalDevelopmentConfig
 from application.database import db
@@ -163,6 +164,12 @@ def delete_activity(aid):
         if deleteActivity(aid):
             return redirect(url_for("home"))
 
+@app.route("/export", methods=["GET"])
+@login_required
+def exportAsCSV():
+    if request.method == "GET":
+        return downloadData()
+
 
 @app.after_request
 def after_request(response):
@@ -201,7 +208,7 @@ def createTracker(data):
             description=data["desc"],
             type=data["t_type"],
             settings=data["settings"],
-            user_id=current_user.id,  # TODO Hardcoded to one user
+            user_id=current_user.id,
         )
         db.session.add(tracker)
         db.session.commit()
@@ -420,6 +427,38 @@ def getBase64Img():
 
     return imgStr.decode()
 
+def downloadData():
+    trackers = db.session.query(Tracker).filter(Tracker.user_id == current_user.id).all()
+    activities = {}
+    for t in trackers:
+        activities[t.id] = db.session.query(Activity).filter(Activity.tracker_id == t.id).all()
+
+    si = StringIO()
+    cw = csv.writer(si, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    
+    cw.writerow(["Tracker"])
+    cw.writerow(["Id, Name, Description, Type, Settings"])
+
+    for row in trackers:
+        line = [maskCSVString(row.id) + ',' + maskCSVString(row.name) + ',' + maskCSVString(row.description) 
+        + ',' + maskCSVString(row.type) + ',' + maskCSVString(row.settings)]
+        cw.writerow(line)
+
+    cw.writerow([""])
+    
+    cw.writerow(["Activity"])
+    cw.writerow(["Id, Name, Description, Type, Settings"])        
+
+    for key in activities.keys():
+        for activity in activities[key]:
+            line = [maskCSVString(activity.id) + ',' + maskCSVString(activity.timestamp) + ',' + maskCSVString(activity.value)
+             + ',' + maskCSVString(activity.note) + ',' + maskCSVString(activity.tracker_id)]
+            cw.writerow(line)
+
+    output = make_response(si.getvalue())
+    output.headers["Content-Disposition"] = "attachment; filename=export.csv"
+    output.headers["Content-type"] = "text/csv"
+    return output
 
 # ENUMS
 class TRACKERTYPE(enum.Enum):
@@ -490,7 +529,7 @@ def validateTrackerLogData(tdata, tid):
 
     if tracker.type == 1:
         try:
-            float(tdata["value"])
+            float(tdata["tvalue"])
         except:
             abort(400, "Log value should be Numeric. ex: 10, 2.5 ...")
 
@@ -535,6 +574,9 @@ def convertToNaturalday(dt):
 
     return (datetime.now() - dt).days
 
+
+def maskCSVString(value):
+    return str(value) #.replace(",",":")
 
 #######################################################################################
 # Login
