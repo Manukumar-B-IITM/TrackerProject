@@ -1,4 +1,4 @@
-<nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light">
+<nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-dark">
   <div class="container-fluid">
     <a class="navbar-brand" href="/">Hello, {{current_user.username}}</a>
     {% if current_user.is_authenticated %}
@@ -19,15 +19,15 @@
         </li>
       </ul>
       <form action="/logout" method="GET">
-        <button class="btn btn-outline-primary" type="submit">Logout</button>
+        <button class="btn btn-info" type="submit">Logout</button>
       </form>
       {% elif isLogin == True %}
       <form action="/register" method="GET">
-        <button class="btn btn-outline-primary" type="submit">Register</button>
+        <button class="btn btn-info" type="submit">Register</button>
       </form>
       {% else %}
       <form action="/login" method="GET">
-        <button class="btn btn-outline-primary" type="submit">Login</button>
+        <button class="btn btn-info" type="submit">Login</button>
       </form>
       {% endif %}
     </div>
