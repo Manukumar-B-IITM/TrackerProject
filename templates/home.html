@@ -25,7 +25,7 @@
                     <th scope="row"> {{ loop.index }}</th>
                     <td><a href="/tracker/{{ t.id }}/overview" class="link-info">{{ t.name }}</a></td>
                     <td>{{ lastTimestamps[t.id] }}</td>
-                    <td><a class="btn btn-primary" href="/tracker/{{ t.id }}/log" role="button">+</a></td>
+                    <td><a class="btn btn-outline-primary" href="/tracker/{{ t.id }}/log" role="button">+</a></td>
                     <td>
                         <div class="dropdown">
                             <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
@@ -49,7 +49,7 @@
         {% endif %}
         
         <div class="vstack gap-2 col-md-5 mx-auto">
-            <a class="btn btn-primary btn-lg" href="/tracker/create" role="button">+ Add Tracker</a>
+            <a class="btn btn-secondary btn-lg" href="/tracker/create" role="button">+ Add Tracker</a>
         </div>
     </div>
 </body>
