@@ -3,15 +3,16 @@
 
 {% include './head_content.html' %}
 
-<body>
+<body onload="onLoadLog()">
     {% include './navbar.html' %}
 
     <h1 class="text-center">Log {{ tracker.name }}</h1>
     <div>
-        <form action="/tracker/{{ tracker.id }}/log" class="container" method="POST" id="create-tracker-log">
+        <form action="/tracker/{{ tracker.id }}/log" class="container" method="POST" id="create-tracker-log" onsubmit="return validateTrackerData()">
             <div class="mb-3">
                 <label class="form-label">When: </label>
                 <input type="datetime-local" class="form-control" name="timestamp" id="whenDateTime" required />
+                <!-- <input type='text' class="form-control" id='whenDateTime' /> -->
             </div>
 
             {% if tracker.type == 1 %}

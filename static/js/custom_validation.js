@@ -11,13 +11,25 @@ function myTracketTypeSelect() {
 }
 
 function validateTrackerData() {
+    // let d = 
+
     let x = document.forms["create-tracker-form"]["t_type"].value;
     if (x == "2") {
         let s = document.forms["create-tracker-form"]["tsettings"].value;
-        if( s == ""){
+        if (s == "") {
             alert("Setting values missing for multiple choice.")
             return false
         }
     }
+    return true;
+}
+
+function onLoadLog() {
+    var local = new Date();
+    local.setMinutes(local.getMinutes() - local.getTimezoneOffset());
+    document.getElementById("whenDateTime").value = local.toJSON().slice(0,16);
+}
+
+function validateTrackerData() {
     return true;
 }

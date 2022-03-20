@@ -37,8 +37,10 @@ app = None
 
 from flask_security.forms import RegisterForm, StringField, Required
 
+
 class ExtendedRegisterForm(RegisterForm):
     username = StringField("User Name", [Required()])
+
 
 def create_app():
     app = Flask(__name__, template_folder="templates")
@@ -161,8 +163,10 @@ def update_activity(aid):
 @login_required
 def delete_activity(aid):
     if request.method == "GET":
+        tid = getActivity(aid).tracker_id
         if deleteActivity(aid):
-            return redirect(url_for("home"))
+            return redirect(url_for("tracker_overview",tid=tid))
+
 
 @app.route("/export", methods=["GET"])
 @login_required
@@ -184,7 +188,9 @@ def after_request(response):
 
 
 def getTrackers():
-    trackers = db.session.query(Tracker).filter(Tracker.user_id == current_user.id).all()
+    trackers = (
+        db.session.query(Tracker).filter(Tracker.user_id == current_user.id).all()
+    )
     lastTimeStamps = {}
     for t in trackers:
         activity = (
@@ -229,17 +235,13 @@ def updateTracker(data, tid):
 
 
 def deleteTracker(tid):
-    try:
-        tracker = Tracker.query.filter(Tracker.id == tid).first()
-        if tracker is not None:
-            db.session.delete(tracker)
-            db.session.commit()
-            return True
-        return False
-    except:
-        db.session.rollback()
-        return False
-
+    db.session.query(Activity).filter(Activity.tracker_id == tid).delete()
+    tracker = Tracker.query.filter(Tracker.id == tid).first()
+    if tracker is not None:
+        db.session.delete(tracker)
+        db.session.commit()
+        return True
+    return False
 
 def getTracker(tid):
     tracker = Tracker.query.filter(Tracker.id == tid).first()
@@ -293,17 +295,12 @@ def updateActivity(data, aid):
 
 
 def deleteActivity(aid):
-    try:
-        activity = Activity.query.filter(Activity.id == aid).first()
-        if activity is not None:
-            db.session.delete(activity)
-            db.session.commit()
-            return True
-        return False
-    except:
-        db.session.rollback()
-        return False
-
+    activity = Activity.query.filter(Activity.id == aid).first()
+    if activity is not None:
+        db.session.delete(activity)
+        db.session.commit()
+        return True
+    return False
 
 def getActivity(aid):
     activity = Activity.query.filter(Activity.id == aid).first()
@@ -427,38 +424,62 @@ def getBase64Img():
 
     return imgStr.decode()
 
+
 def downloadData():
-    trackers = db.session.query(Tracker).filter(Tracker.user_id == current_user.id).all()
+    trackers = (
+        db.session.query(Tracker).filter(Tracker.user_id == current_user.id).all()
+    )
     activities = {}
     for t in trackers:
-        activities[t.id] = db.session.query(Activity).filter(Activity.tracker_id == t.id).all()
+        activities[t.id] = (
+            db.session.query(Activity).filter(Activity.tracker_id == t.id).all()
+        )
 
     si = StringIO()
-    cw = csv.writer(si, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-    
+    cw = csv.writer(si, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
     cw.writerow(["Tracker"])
     cw.writerow(["Id, Name, Description, Type, Settings"])
 
     for row in trackers:
-        line = [maskCSVString(row.id) + ',' + maskCSVString(row.name) + ',' + maskCSVString(row.description) 
-        + ',' + maskCSVString(row.type) + ',' + maskCSVString(row.settings)]
+        line = [
+            maskCSVString(row.id)
+            + ","
+            + maskCSVString(row.name)
+            + ","
+            + maskCSVString(row.description)
+            + ","
+            + maskCSVString(row.type)
+            + ","
+            + maskCSVString(row.settings)
+        ]
         cw.writerow(line)
 
     cw.writerow([""])
-    
+
     cw.writerow(["Activity"])
-    cw.writerow(["Id, Name, Description, Type, Settings"])        
+    cw.writerow(["Id, Name, Description, Type, Settings"])
 
     for key in activities.keys():
         for activity in activities[key]:
-            line = [maskCSVString(activity.id) + ',' + maskCSVString(activity.timestamp) + ',' + maskCSVString(activity.value)
-             + ',' + maskCSVString(activity.note) + ',' + maskCSVString(activity.tracker_id)]
+            line = [
+                maskCSVString(activity.id)
+                + ","
+                + maskCSVString(activity.timestamp)
+                + ","
+                + maskCSVString(activity.value)
+                + ","
+                + maskCSVString(activity.note)
+                + ","
+                + maskCSVString(activity.tracker_id)
+            ]
             cw.writerow(line)
 
     output = make_response(si.getvalue())
     output.headers["Content-Disposition"] = "attachment; filename=export.csv"
     output.headers["Content-type"] = "text/csv"
     return output
+
 
 # ENUMS
 class TRACKERTYPE(enum.Enum):
@@ -493,7 +514,7 @@ def validateTrackerData(tdata):
     if tdata["name"] is None or tdata["name"] == "":
         abort(400, "Tracker Name is mandatory")
 
-    if not tdata["name"].isalpha():
+    if not tdata["name"].replace(" ","").isalpha():
         abort(400, "Only alphabets are allowed for Tracker Name")
 
     if tdata["t_type"] is None or tdata["t_type"] == "":
@@ -559,12 +580,12 @@ def validateTrackerLogData(tdata, tid):
 
 def convertToNaturalday(dt):
     count = (datetime.now() - dt).days
-    if count == 0:
+    if count == 0 or count == -1:
         return "Today"
     elif count == 1:
         return "Yesterday"
     elif count > 1 and count < 31:
-        return count + " day(s) ago"
+        return str(count) + " day(s) ago"
     elif count > 30 and count < 366:
         return (
             "" + str(int(count / 30)) + " Month(s) " + str(count % 30) + " Day(s) ago"
@@ -578,13 +599,12 @@ def convertToNaturalday(dt):
 
 
 def maskCSVString(value):
-    return str(value) #.replace(",",":")
+    return str(value)  # .replace(",",":")
+
 
 #######################################################################################
 # Login
 #######################################################################################
-
-
 
 
 if __name__ == "__main__":
