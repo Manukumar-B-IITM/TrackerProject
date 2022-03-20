@@ -3,7 +3,7 @@
 
 {% include './head_content.html' %}
 
-<body>
+<body onload="onLoadLog()">
     {% include './navbar.html' %}
 
     <h1 class="text-center">Update Log {{ tracker.name }}</h1>
@@ -11,6 +11,7 @@
         <div class="mb-3">
             <label class="form-label">When: </label>
             <input type="datetime-local" class="form-control" name="timestamp" id="whenDateTime" required />
+            <input type="hidden" id="utctime" name="utctimestamp">
         </div>
 
         {% if tracker.type == 1 %}

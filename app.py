@@ -3,7 +3,7 @@ import io
 from io import StringIO
 import os
 import base64
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import csv
 from flask import Flask, make_response
@@ -249,6 +249,7 @@ def getTracker(tid):
 
 
 def getTrackerData(tid):
+    usertimeoffset = -int(request.args.get('offset'))
     tracker = getTracker(tid)
     activities = (
         db.session.query(Activity)
@@ -256,6 +257,11 @@ def getTrackerData(tid):
         .order_by(Activity.timestamp)
         .all()
     )
+
+    #Update to user timezone
+    for a in activities:
+        a.timestamp += timedelta(minutes=usertimeoffset)
+    
     return tracker, activities
 
 
@@ -268,7 +274,7 @@ def create_log(data, tid):
     if validateTrackerLogData(data, tid):
         # TODO handle the timestamp better with UTC timestamps
         activity = Activity(
-            timestamp=getPythonTime(data["timestamp"]),
+            timestamp=getPythonTime(data["utctimestamp"]),
             value=",".join(request.form.getlist("tvalue")),  # joining by ','
             note=data["note"],
             tracker_id=tid,
@@ -284,7 +290,7 @@ def updateActivity(data, aid):
         activity = db.session.query(Activity).filter(Activity.id == aid).first()
         if activity != None:
 
-            activity.timestamp = getPythonTime(data["timestamp"])
+            activity.timestamp = getPythonTime(data["utctimestamp"])
             activity.value = ",".join(request.form.getlist("tvalue"))
             activity.note = data["note"]
 
@@ -333,9 +339,9 @@ def getBase64LineChartImg(activities):
 
     x = []
     y = []
-
+    usertimeoffset = -int(request.args.get('offset'))
     for a in activities:
-        x.append(a.timestamp)
+        x.append(a.timestamp + timedelta(minutes=usertimeoffset))
         y.append(float(a.value))
 
     # naming the x axis

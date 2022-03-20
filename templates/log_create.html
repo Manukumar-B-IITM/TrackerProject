@@ -11,7 +11,8 @@
         <form action="/tracker/{{ tracker.id }}/log" class="container" method="POST" id="create-tracker-log" onsubmit="return validateTrackerData()">
             <div class="mb-3">
                 <label class="form-label">When: </label>
-                <input type="datetime-local" class="form-control" name="timestamp" id="whenDateTime" required />
+                <input type="datetime-local" class="form-control" name="timestamp" id="whenDateTime" change="convertToUTC()" required />
+                <input type="hidden" id="utctime" name="utctimestamp">
                 <!-- <input type='text' class="form-control" id='whenDateTime' /> -->
             </div>
 

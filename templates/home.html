@@ -3,7 +3,7 @@
 
 {% include './head_content.html' %}
 
-<body>
+<body  onload="onLoadHome()">
     {% include './navbar.html' %}
     <div class="container">
         {% if trackers|length > 0 %}
@@ -23,7 +23,7 @@
                 {% for t in trackers %}
                 <tr>
                     <th scope="row"> {{ loop.index }}</th>
-                    <td><a href="/tracker/{{ t.id }}/overview" class="link-info">{{ t.name }}</a></td>
+                    <td><a href="/tracker/{{ t.id }}/overview" class="tracker-links link-info">{{ t.name }}</a></td>
                     <td>{{ lastTimestamps[t.id] }}</td>
                     <td><a class="btn btn-outline-primary" href="/tracker/{{ t.id }}/log" role="button">+</a></td>
                     <td>
