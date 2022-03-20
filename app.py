@@ -529,7 +529,9 @@ def validateTrackerLogData(tdata, tid):
 
     if tracker.type == 1:
         try:
-            float(tdata["tvalue"])
+            val = float(tdata["tvalue"])
+            if val < 0:
+                abort(400, "Log value should positive. ex: 10, 2.5 ...")
         except:
             abort(400, "Log value should be Numeric. ex: 10, 2.5 ...")
 

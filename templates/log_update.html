@@ -16,7 +16,7 @@
         {% if tracker.type == 1 %}
         <div class="mb-3">
             <label class="form-label">Value:</label>
-            <input type="text" class="form-control" name="tvalue" required />
+            <input type="number" min="0" class="form-control" name="tvalue" step="any" required />
         </div>
 
         {% elif tracker.type == 2 %}
@@ -35,14 +35,12 @@
         {% elif tracker.type == 3 %}
         <div class="mb-3">
             <label class="form-label">Hours:</label>
-            <input type="number" class="form-control" name="tvalue" required />
+            <input type="number" min="0" class="form-control" name="tvalue" required />
         </div>
         <div class="mb-3">
             <label class="form-label">Minutes:</label>
-            <!-- <input type="text" class="form-control" name="tvalue" required /> -->
-            <!-- <input type="range" class="form-range" min="0" max="59"  step="1" id="customRange2" name="tvalue" required> -->
             <select class="form-select" name="tvalue" aria-label="Default select example">
-                <!-- <option selected>Open this select menu</option> -->
+
                 {% for min in range(0,60) %}
                 <option value="{{min}}">{{min}}</option>
                 {% endfor %}
@@ -50,11 +48,8 @@
         </div>
         <div class="mb-3">
             <label class="form-label">Seconds:</label>
-            <!-- <input type="text" class="form-control" name="tvalue" required /> -->
-            <!-- <input type="range" class="form-range" min="0" max="59" step="1" id="customRange2" name="tvalue"
-                required> -->
+
             <select class="form-select" name="tvalue" aria-label="Default select example">
-                <!-- <option selected>Open this select menu</option> -->
                 {% for sec in range(0,60) %}
                 <option value="{{sec}}">{{sec}}</option>
                 {% endfor %}
@@ -76,11 +71,6 @@
                     No
                 </label>
             </div>
-            <!-- <input type="radio" id="yes" name="tvalue" value="1"> -->
-            <!-- <label>Yes</label> -->
-            <!-- <input type="radio" id="no" name="tvalue" value="0">
-             -->
-            <!-- <label>No</label> -->
         </div>
 
         {% endif %}

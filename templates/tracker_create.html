@@ -8,7 +8,7 @@
 
     <h1 class="text-center">Create a Tracker</h1>
     <div>
-        <form action="/tracker/create" class="container" method="POST" id="create-tracker-form">
+        <form action="/tracker/create" class="container" method="POST" id="create-tracker-form" onsubmit="return validateTrackerData()">
             <div class="mb-3">
                 <label for="tname" class="form-label">Tracker Name: </label>
                 <input type="text" class="form-control" id="tname" name="name" aria-describedby="namehelp" required />
