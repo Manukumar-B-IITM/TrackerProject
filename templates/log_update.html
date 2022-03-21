@@ -12,12 +12,13 @@
             <label class="form-label">When: </label>
             <input type="datetime-local" class="form-control" name="timestamp" id="whenDateTime" required />
             <input type="hidden" id="utctime" name="utctimestamp">
+            <input type="hidden" id="backurl" name="backurl" value="{{backurl}}">
         </div>
 
         {% if tracker.type == 1 %}
         <div class="mb-3">
             <label class="form-label">Value:</label>
-            <input type="number" min="0" class="form-control" name="tvalue" step="any" required />
+            <input type="number" min="0" class="form-control" name="tvalue" step="any" value="{{activity.value}}" required />
         </div>
 
         {% elif tracker.type == 2 %}
@@ -26,7 +27,7 @@
             <label class="form-label">Select:</label>
             {% for p in options %}
             <div class="form-check">
-                <input type="checkbox" class="form-check-input" name="tvalue" value="{{p}}" />
+                <input type="checkbox" class="form-check-input" name="tvalue" value="{{p}}" {{ "checked" if p in activity.value.split(",") }} />
                 <label class="form-check-label">{{p}}</label>
             </div>
             {% endfor %}
@@ -34,16 +35,17 @@
         </div>
 
         {% elif tracker.type == 3 %}
+        {% set timevalues = activity.value.split(",") %}
         <div class="mb-3">
             <label class="form-label">Hours:</label>
-            <input type="number" min="0" class="form-control" name="tvalue" required />
+            <input type="number" min="0" class="form-control" name="tvalue" value= "{{timevalues[0]}}" required />
         </div>
         <div class="mb-3">
             <label class="form-label">Minutes:</label>
             <select class="form-select" name="tvalue" aria-label="Default select example">
 
                 {% for min in range(0,60) %}
-                <option value="{{min}}">{{min}}</option>
+                <option value="{{min}}"  {{ "selected" if min == timevalues[1] | int }}>{{min}}</option>
                 {% endfor %}
             </select>
         </div>
@@ -52,7 +54,7 @@
 
             <select class="form-select" name="tvalue" aria-label="Default select example">
                 {% for sec in range(0,60) %}
-                <option value="{{sec}}">{{sec}}</option>
+                <option value="{{sec}}" {{ "selected" if sec == timevalues[2] | int }}>{{sec}}</option>
                 {% endfor %}
             </select>
         </div>
@@ -61,13 +63,13 @@
         <div class="mb-3">
             <label class="form-label">Value:</label>
             <div class="form-check">
-                <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" value="1">
+                <input class="form-check-input" type="radio" name="tvalue" id="flexRadioDefault1" value="1" {{ "checked" if 1 == activity.value | int }}>
                 <label class="form-check-label" for="flexRadioDefault1">
                     Yes
                 </label>
             </div>
             <div class="form-check">
-                <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" value="0">
+                <input class="form-check-input" type="radio" name="tvalue" id="flexRadioDefault1" value="0" {{ "checked" if 0 == activity.value | int }}>
                 <label class="form-check-label" for="flexRadioDefault1">
                     No
                 </label>

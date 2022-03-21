@@ -11,6 +11,8 @@ from flask_login import current_user, login_required
 from application.config import LocalDevelopmentConfig
 from application.database import db
 import logging
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -152,20 +154,19 @@ def update_activity(aid):
             "log_update.html",
             activity=activity,
             tracker=getTracker(activity.tracker_id),
+            backurl = request.referrer
         )
     elif request.method == "POST":
-        if updateActivity(request.form, aid) == False:
-            abort(500)
-        return redirect(url_for("home"))
+        if updateActivity(request.form, aid):
+            return redirect(request.form["backurl"])
 
 
 @app.route("/activity/<int:aid>/delete")
 @login_required
 def delete_activity(aid):
     if request.method == "GET":
-        tid = getActivity(aid).tracker_id
         if deleteActivity(aid):
-            return redirect(url_for("tracker_overview", tid=tid))
+            return redirect(request.referrer)
 
 
 @app.route("/export", methods=["GET"])
