@@ -165,7 +165,7 @@ def delete_activity(aid):
     if request.method == "GET":
         tid = getActivity(aid).tracker_id
         if deleteActivity(aid):
-            return redirect(url_for("tracker_overview",tid=tid))
+            return redirect(url_for("tracker_overview", tid=tid))
 
 
 @app.route("/export", methods=["GET"])
@@ -243,13 +243,14 @@ def deleteTracker(tid):
         return True
     return False
 
+
 def getTracker(tid):
     tracker = Tracker.query.filter(Tracker.id == tid).first()
     return tracker
 
 
 def getTrackerData(tid):
-    usertimeoffset = -int(request.args.get('offset'))
+    usertimeoffset = -int(request.args.get("offset"))
     tracker = getTracker(tid)
     activities = (
         db.session.query(Activity)
@@ -258,10 +259,10 @@ def getTrackerData(tid):
         .all()
     )
 
-    #Update to user timezone
+    # Update to user timezone
     for a in activities:
         a.timestamp += timedelta(minutes=usertimeoffset)
-    
+
     return tracker, activities
 
 
@@ -308,6 +309,7 @@ def deleteActivity(aid):
         return True
     return False
 
+
 def getActivity(aid):
     activity = Activity.query.filter(Activity.id == aid).first()
     return activity
@@ -339,7 +341,7 @@ def getBase64LineChartImg(activities):
 
     x = []
     y = []
-    usertimeoffset = -int(request.args.get('offset'))
+    usertimeoffset = -int(request.args.get("offset"))
     for a in activities:
         x.append(a.timestamp + timedelta(minutes=usertimeoffset))
         y.append(float(a.value))
@@ -520,7 +522,7 @@ def validateTrackerData(tdata):
     if tdata["name"] is None or tdata["name"] == "":
         abort(400, "Tracker Name is mandatory")
 
-    if not tdata["name"].replace(" ","").isalpha():
+    if not tdata["name"].replace(" ", "").isalpha():
         abort(400, "Only alphabets are allowed for Tracker Name")
 
     if tdata["t_type"] is None or tdata["t_type"] == "":
@@ -615,4 +617,5 @@ def maskCSVString(value):
 
 if __name__ == "__main__":
     # Run the Flask app
-    app.run(debug=False)
+    app.run(host="0.0.0.0", debug=False)
+
