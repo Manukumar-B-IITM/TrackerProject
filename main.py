@@ -567,6 +567,9 @@ def validateTrackerLogData(tdata, tid):
     if tracker is None:
         abort(400, "Tracker id is not valid.")
 
+    if tdata["tvalue"] is None or tdata["tvalue"] == "":
+        abort(400, "Tracker log value is mandatory.")
+
     if tracker.type == 1:
         try:
             val = float(tdata["tvalue"])
