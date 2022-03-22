@@ -224,7 +224,7 @@ def createTracker(data):
 
 
 def updateTracker(data, tid):
-    if validateTrackerData(data):
+    if validateUpdateTrackerData(data):
         tracker = db.session.query(Tracker).filter(Tracker.id == tid).first()
         if tracker != None:
             tracker.name = data["name"]
@@ -383,9 +383,9 @@ def getBase64PieChart(activities):
 def getBase64BarChart(activities):
     xTimeStamp = []
     minutesY = []
-
+    usertimeoffset = -int(request.args.get("offset"))
     for a in activities:
-        xTimeStamp.append(a.timestamp)
+        xTimeStamp.append(a.timestamp + timedelta(minutes=usertimeoffset))
         timeValues = a.value.split(",")
         minutesY.append(
             (int(timeValues[0]) * 60) + int(timeValues[1]) + int(timeValues[2]) / 60
@@ -539,6 +539,16 @@ def validateTrackerData(tdata):
             400,
             "For multichoice tracker, setting field is mandatory. Choices should be entered as comma separated values.",
         )
+
+    return True
+
+def validateUpdateTrackerData(tdata):
+    # Validate Tracker data
+    if tdata["name"] is None or tdata["name"] == "":
+        abort(400, "Tracker Name is mandatory")
+
+    if not tdata["name"].replace(" ", "").isalpha():
+        abort(400, "Only alphabets are allowed for Tracker Name")
 
     return True
 
