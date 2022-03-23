@@ -14,6 +14,7 @@ import logging
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 import numpy as np
 
 from flask import request, url_for
@@ -342,9 +343,8 @@ def getBase64LineChartImg(activities):
 
     x = []
     y = []
-    usertimeoffset = -int(request.args.get("offset"))
     for a in activities:
-        x.append(a.timestamp + timedelta(minutes=usertimeoffset))
+        x.append(a.timestamp)
         y.append(float(a.value))
 
     # naming the x axis
@@ -357,6 +357,8 @@ def getBase64LineChartImg(activities):
     plt.title("Trend over time")
     plt.tight_layout()
     plt.plot(x, y, marker="o")
+    plt.subplot().xaxis.set_major_formatter(mdates.DateFormatter('%y-%m-%d'))
+    plt.locator_params(axis='both', nbins=10)
 
     return getBase64Img()
 
@@ -383,9 +385,9 @@ def getBase64PieChart(activities):
 def getBase64BarChart(activities):
     xTimeStamp = []
     minutesY = []
-    usertimeoffset = -int(request.args.get("offset"))
+    
     for a in activities:
-        xTimeStamp.append(a.timestamp + timedelta(minutes=usertimeoffset))
+        xTimeStamp.append(a.timestamp)
         timeValues = a.value.split(",")
         minutesY.append(
             (int(timeValues[0]) * 60) + int(timeValues[1]) + int(timeValues[2]) / 60
@@ -406,6 +408,8 @@ def getBase64BarChart(activities):
     plt.title("Trend over time")
     plt.tight_layout()
     plt.plot(xTimeStamp, minutesY, marker="o")
+    plt.subplot().xaxis.set_major_formatter(mdates.DateFormatter('%y-%m-%d'))
+    plt.locator_params(axis='both', nbins=10)
 
     return getBase64Img()
 
@@ -420,8 +424,14 @@ def getBase64BoolBarChart(activities):
             yesCount += 1
         else:
             NoCount += 1
-    plt.bar(x, [yesCount, NoCount])
+    total = yesCount + NoCount
 
+    plt.ylabel("Percentage")
+    plt.yticks(
+        np.arange(0,110,10)
+    )
+    plt.bar(x, [(yesCount/total)*100, (NoCount/total)*100])
+    # plt.locator_params(axis='y', nbins=100)
     return getBase64Img()
 
 
